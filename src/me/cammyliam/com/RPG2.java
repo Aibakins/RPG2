@@ -418,6 +418,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 					player.sendMessage("Weapon durability increase by " + getConfig().getInt("Options.Anvil.DuraToAdd") + " for " + getConfig().getInt("Options.Anvil.Price") + " Gold.");
 				} else {
 					player.sendMessage("This weapon can't be fixed because you don't have enough Gold.");
+					player.sendMessage("It costs " + getConfig().getInt("Options.Anvil.Price") + " Gold to repair.");
 				}
 			}
 			if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
