@@ -27,6 +27,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -281,10 +282,14 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (!getConfig().isSet("Loot")) {
 			this.upd("Loot.defaultloot", "GOLD_INGOT,");
 		}
+		if (!getConfig().isSet("Drops")) {
+			this.upd("Drops.ZOMBIE", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
+			this.upd("Drops.CREEPER", "GOLD_INGOT,GOLD_INGOT");
+		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
-			this.upd("Items.Regener.Actual-Item", 276);
-			this.upd("Items.Regener.Dura", 200); //Custom durability, 0 for default
+			this.upd("Items.Regener.Actual-Item", 276); //item texture
+			this.upd("Items.Regener.Dura", 200); //Custom durability, 0 for default (broken)
 			this.upd("Items.Regener.Value", 24); //Cost of item
 			this.upd("Items.Regener.Damage", 20); //How much damage the weapon done
 			this.upd("Items.Regener.HP", 10); //Health to add on the default
@@ -503,6 +508,19 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler(priority = EventPriority.LOW)
+	public void onEntityDeath(EntityDeathEvent event) {
+		if (!(event.getEntity() instanceof Player)) {
+			if (getConfig().isSet("Drops." + event.getEntityType().getName().toUpperCase())) {
+				String[] d = getConfig().getString("Drops." + event.getEntityType().getName().toUpperCase()).split(",");
+				try {
+					event.getDrops().clear();
+					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
+				} catch (Exception e) {} 
+			}
+		}
+	}
 
 	@EventHandler(priority = EventPriority.LOW)
 	public void onTargetChange(EntityTargetEvent event) {
@@ -510,7 +528,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			event.setTarget(Bukkit.getPlayer(getConfig().getString("Mobs." + event.getEntity().getEntityId())));
 		}
 	}
-
+	
 	@EventHandler(priority = EventPriority.LOW)
 	public void onSignChange(SignChangeEvent event) {
 		if (event.getLine(0).equalsIgnoreCase("[buy]")) {
