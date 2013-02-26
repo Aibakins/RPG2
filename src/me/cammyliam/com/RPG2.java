@@ -15,15 +15,8 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -33,20 +26,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -217,6 +206,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		String[] i = getConfig().getString("Options.first-time-join").split(",");
 		return new Location(Bukkit.getWorld(i[0]), Integer.parseInt(i[1]), Integer.parseInt(i[2]), Integer.parseInt(i[3]));
 	}
+	public Location getRespawn() {
+		String[] i = getConfig().getString("Options.respawn").split(",");
+		return new Location(Bukkit.getWorld(i[0]), Integer.parseInt(i[1]), Integer.parseInt(i[2]), Integer.parseInt(i[3]));
+	}
 
 	public void newHealth(Player player) {
 		int h = getConfig().getInt("Options.default-health");
@@ -281,6 +274,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Options.default-health", 20);
 			this.upd("Options.default-bankslots", 9);
 			this.upd("Options.first-time-join", "world,-140,4,-23");
+			this.upd("Options.respawn", "world,-140,4,-23");
 			this.upd("Options.Anvil.Price", 13);
 			this.upd("Options.Anvil.DuraToAdd", 60);
 		}
@@ -354,6 +348,11 @@ public class RPG2 extends JavaPlugin implements Listener {
 			upd("Players." + player.getName() + ".dropto", "null");
 			upd("Players." + player.getName() + ".Bank", getConfig().getInt("Options.default-bankslots"));
 		}
+	}
+
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		event.setRespawnLocation(getRespawn());
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
