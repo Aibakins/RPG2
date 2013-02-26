@@ -1,0 +1,17 @@
+name: RPG2
+main: me.cammyliam.com.RPG2
+version: 1
+author: liamallan & InFinPie
+commands:
+    it:
+        description: Spawn a custom items
+        usage: /it <name _ instead of spaces>
+    pet:
+        description: Spawn a pet!
+        usage: /pet ENTITYNAME
+    loot:
+        description: Change chest loot
+        usage: /loot <loot>
+    test:
+        description: Test command
+        usage: /test
