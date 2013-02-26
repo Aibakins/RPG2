@@ -21,6 +21,7 @@ To add
 ====
 * Merchant Traders instead of a stupid sign shop
 * Rage (displayed using the XP bar)
+* Boss Mobs (Skeles, Giants, Spider Jocks, and Wither)
 
 Item Attributes
 ====
