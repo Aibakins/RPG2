@@ -20,7 +20,7 @@ Current Features
 To add
 ====
 * Merchant Traders instead of a stupid sign shop
-* Rage (displayed using the XP bar)
+* Rage (displayed using the XP bar) (Working on at the moment)
 * Boss Mobs (Skeles, Giants, Spider Jocks, and Wither)
 * Perhaps an Attribute to increase armor. 
 

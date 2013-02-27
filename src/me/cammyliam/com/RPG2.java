@@ -93,19 +93,21 @@ public class RPG2 extends JavaPlugin implements Listener {
 		return ret;
 	}
 
-	/*public float returnRage(Player player) {
-		float xp = (player.getExp() + player.getExpToLevel()) / 100;
-		float r = (player.getExp() / xp);
-		return r;
+	public float returnRage(Player player) {
+		return player.getExp();
 	}
-	public void addRage(Player player, int x) {
-		float xp = (player.getExp() + player.getExpToLevel()) / 100;
-		player.setExp(returnRage(player) + (xp * x));
+	public void addRage(Player player, float x) {
+		player.setTotalExperience(100);
+		if (player.getExp() > x) {
+			player.setExp(returnRage(player) + x);
+		}
 	}
-	public void remRage(Player player, int x) {
-		float xp = (player.getExp() + player.getExpToLevel()) / 100;
-		player.setExp(returnRage(player) - (xp * x));
-	}*/
+	public void remRage(Player player, float x) {
+		player.setTotalExperience(100);
+		if (player.getExp() > x) {
+			player.setExp(returnRage(player) - x);
+		}
+	}
 
 	public void spawnPet(Player player, String type) {
 		EntityType monster = EntityType.fromName(type.toUpperCase());
@@ -329,6 +331,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
+		remRage(player, rand.nextInt(2));
 		if (player.isSprinting()) {
 			if (player.getFoodLevel() > 3) {
 				player.setFoodLevel(player.getFoodLevel() - rand.nextInt(2));
@@ -488,14 +491,20 @@ public class RPG2 extends JavaPlugin implements Listener {
 					}
 				}
 			} catch (Exception e) {}
-			event.setDamage(Damage);
 			if (getConfig().isSet("Mobs." + event.getEntity().getEntityId())) {
 				event.setCancelled(true);
 				event.setDamage(0);
 			}
 			if (Damage > 0) {
+				addRage(given, 2);
+				if (returnRage(given) > 96) {
+					Damage = Damage * 2;
+					given.sendMessage(ChatColor.DARK_RED + "-- Times two damage! --");
+					remRage(given, 40);
+				}
 				given.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage given: " + Damage + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
+			event.setDamage(Damage);
 		}
 		if (event.getEntity() instanceof Player) {
 			if (getConfig().isSet("Mobs." + event.getDamager().getEntityId())) {
@@ -512,7 +521,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOW)
 	public void onEntityDeath(EntityDeathEvent event) {
 		if (!(event.getEntity() instanceof Player)) {
@@ -532,7 +541,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			event.setTarget(Bukkit.getPlayer(getConfig().getString("Mobs." + event.getEntity().getEntityId())));
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOW)
 	public void onSignChange(SignChangeEvent event) {
 		if (event.getLine(0).equalsIgnoreCase("[buy]")) {
