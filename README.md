@@ -22,8 +22,9 @@ To add
 * Merchant Traders instead of a stupid sign shop
 * Rage (displayed using the XP bar)
 * Boss Mobs (Skeles, Giants, Spider Jocks, and Wither)
+* Perhaps an Attribute to increase armor. 
 
-Item Attributes
+Item Attributes (Also works on Armor)
 ====
 * Custom damage (for weapons)
 * Add health to the player
