@@ -198,7 +198,11 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im.setLore(lore);
 			is.setItemMeta(im);
 		} else {
-			is = new ItemStack(Material.getMaterial(name.toUpperCase()), 1);
+			try {
+				is = new ItemStack(Material.getMaterial(name.toUpperCase()), 1);
+			} catch (Exception e) {
+				is = new ItemStack(Material.AIR);
+			}
 		}
 		return is;
 	}
