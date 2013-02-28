@@ -37,6 +37,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -217,6 +218,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		String[] i = getConfig().getString("Options.respawn").split(",");
 		return new Location(Bukkit.getWorld(i[0]), Integer.parseInt(i[1]), Integer.parseInt(i[2]), Integer.parseInt(i[3]));
 	}
+	public Location getHearthstone(Player player) {
+		String[] i = getConfig().getString("Players." + player.getName() + ".hearthstone").split(",");
+		return new Location(Bukkit.getWorld(i[0]), Integer.parseInt(i[1]), Integer.parseInt(i[2]), Integer.parseInt(i[3]));
+	}
 
 	public void newHealth(Player player) {
 		int h = getConfig().getInt("Options.default-health");
@@ -284,6 +289,8 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Options.respawn", "world,-140,4,-23");
 			this.upd("Options.Anvil.Price", 13);
 			this.upd("Options.Anvil.DuraToAdd", 60);
+			this.upd("Options.Tools.SafeDropToolID", 352);
+			this.upd("Options.Tools.HearthstoneID", 399);
 		}
 		if (!getConfig().isSet("Loot")) {
 			this.upd("Loot.defaultloot", "GOLD_INGOT,");
@@ -356,9 +363,28 @@ public class RPG2 extends JavaPlugin implements Listener {
 
 		if (!getConfig().isSet("Players." + player.getName())) {
 			player.teleport(new Location(Bukkit.getWorld("world"), -140, 4, -23));
-			upd("Players." + player.getName() + ".Joined", true);
 			upd("Players." + player.getName() + ".dropto", "null");
 			upd("Players." + player.getName() + ".Bank", getConfig().getInt("Options.default-bankslots"));
+			upd("Players." + player.getName() + ".hearthstone", "null");
+			ItemStack is;
+			ItemMeta im;
+			ArrayList<String> lore;
+			is = new ItemStack(Material.getMaterial(getConfig().getInt("Options.Tools.SafeDropToolID")), 1);
+			im = is.getItemMeta();
+			im.setDisplayName("Safe-Drop Tool");
+			lore = new ArrayList<String>();
+			lore.add(ChatColor.GOLD + "Use this item to safe-drop. (Soulbound)");
+			im.setLore(lore);
+			is.setItemMeta(im);
+			player.getInventory().addItem(is);
+			is = new ItemStack(Material.getMaterial(getConfig().getInt("Options.Tools.HearthstoneID")), 1);
+			im = is.getItemMeta();
+			im.setDisplayName("Hearthstone");
+			lore = new ArrayList<String>();
+			lore.add(ChatColor.GOLD + "Use this item to return to the Hearthstone home. (Soulbound)");
+			im.setLore(lore);
+			is.setItemMeta(im);
+			player.getInventory().addItem(is);
 		}
 	}
 
@@ -372,14 +398,25 @@ public class RPG2 extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 
 		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-			if (player.getItemInHand().getType() == Material.BONE) {
-				upd("Players." + player.getName() + ".dropto", "null");
-				player.sendMessage("Drops set to: free-for-all");
+			if (player.getItemInHand().getItemMeta().hasDisplayName()) {
+				if (player.getItemInHand().getItemMeta().getDisplayName().equals("Safe-Drop Tool")) {
+					upd("Players." + player.getName() + ".dropto", "null");
+					player.sendMessage("Drops set to: free-for-all");
+				}
+				else if (player.getItemInHand().getItemMeta().getDisplayName().equals("Hearthstone")) {
+					try {
+						player.teleport(getHearthstone(player));
+						player.sendMessage("You have been teleported to your Hearthstone's location.");
+					} catch (Exception e) {
+						player.sendMessage("You might not have set your Hearthstone location.");
+					}
+				}
 			}
 		}
 
 		if (event.getClickedBlock() == null) return;
 		Block block = event.getClickedBlock();
+
 
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (block.getType() == Material.ENDER_CHEST) {
@@ -448,6 +485,16 @@ public class RPG2 extends JavaPlugin implements Listener {
 						player.sendMessage("You don't have enough to buy this item.");
 					}
 				}
+				if (sign.getLine(0).equalsIgnoreCase("[hearthstone]")) {
+					try {
+						player.sendMessage("You set Hearthstone to " + sign.getLine(1) + ".");
+						Location loc = player.getLocation();
+						String loca = loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+						upd("Players." + player.getName() + ".hearthstone", loca);
+					} catch (Exception e) {
+						player.sendMessage("There was a problem setting your Hearthstone here.");
+					}
+				}
 			}
 		}
 	}
@@ -481,13 +528,17 @@ public class RPG2 extends JavaPlugin implements Listener {
 						Damage = Damage + returnLifeSteal(given.getItemInHand().getItemMeta().getDisplayName());
 						given.setHealth(given.getHealth() + returnLifeSteal(given.getItemInHand().getItemMeta().getDisplayName()));
 					}
-				} else if (given.getItemInHand().getType() == Material.BONE) {
-					if (event.getEntity() instanceof Player) {
-						event.setCancelled(true);
-						Damage = 0;
-						Player taken = (Player) event.getEntity();
-						given.sendMessage("Drops set to: " + taken.getName() + " only");
-						upd("Players." + given.getName() + ".dropto", taken.getName());
+				} else if (given.getItemInHand().getType() == Material.getMaterial(getConfig().getInt("Options.Tools.SafeDropToolID"))) {
+					if (given.getItemInHand().getItemMeta().hasDisplayName()) {
+						if (given.getItemInHand().getItemMeta().getDisplayName() == "Safe-Drop Tool") {
+							if (event.getEntity() instanceof Player) {
+								event.setCancelled(true);
+								Damage = 0;
+								Player taken = (Player) event.getEntity();
+								given.sendMessage("Drops set to: " + taken.getName() + " only");
+								upd("Players." + given.getName() + ".dropto", taken.getName());
+							}
+						}
 					}
 				}
 			} catch (Exception e) {}
@@ -557,6 +608,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onItemDrop(PlayerDropItemEvent event) {
 		Player dropper = event.getPlayer();
+
 		if (!(getConfig().getString("Players." + dropper.getName() + ".dropto") == "null")) {
 			Player dropto = Bukkit.getPlayer(getConfig().getString("Players." + dropper.getName() + ".dropto"));
 			dropto.getInventory().addItem(event.getItemDrop().getItemStack());

@@ -16,6 +16,7 @@ Current Features
 * Sign shops
 * Damage display
 * Different repair system (anvil right click only to prevent item renaming)
+* WoW styled hearthstone (With custom item)
 
 To add
 ====
