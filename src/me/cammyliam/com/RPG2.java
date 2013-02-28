@@ -93,7 +93,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		return ret;
 	}
 
-	public float returnRage(Player player) {
+	/*public float returnRage(Player player) {
 		return player.getExp();
 	}
 	public void addRage(Player player, float x) {
@@ -107,7 +107,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (player.getExp() > x) {
 			player.setExp(returnRage(player) - x);
 		}
-	}
+	}*/
 
 	public void spawnPet(Player player, String type) {
 		EntityType monster = EntityType.fromName(type.toUpperCase());
@@ -331,7 +331,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
-		remRage(player, rand.nextInt(2));
+		//remRage(player, rand.nextInt(2));
 		if (player.isSprinting()) {
 			if (player.getFoodLevel() > 3) {
 				player.setFoodLevel(player.getFoodLevel() - rand.nextInt(2));
@@ -496,12 +496,12 @@ public class RPG2 extends JavaPlugin implements Listener {
 				event.setDamage(0);
 			}
 			if (Damage > 0) {
-				addRage(given, 2);
+				/*addRage(given, 2);
 				if (returnRage(given) > 96) {
 					Damage = Damage * 2;
 					given.sendMessage(ChatColor.DARK_RED + "-- Times two damage! --");
 					remRage(given, 40);
-				}
+				}*/
 				given.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage given: " + Damage + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
 			event.setDamage(Damage);
