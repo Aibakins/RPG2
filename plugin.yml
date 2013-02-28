@@ -15,3 +15,6 @@ commands:
     test:
         description: Test command
         usage: /test
+    boss:
+        description: Spawn a boss
+        usage: /boss <boss>

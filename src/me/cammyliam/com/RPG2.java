@@ -15,8 +15,10 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -37,7 +39,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -127,6 +128,18 @@ public class RPG2 extends JavaPlugin implements Listener {
 			mob.setTarget(player);
 			mob.setBaby(true);
 			mob.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 72000, 1));
+		}
+	}
+
+	public void spawnBoss(Location location, String type) {
+		if (getConfig().isSet("Bosses.Config." + type.toUpperCase())) {
+			EntityType ent = EntityType.fromName(type.toUpperCase());
+			if (ent == EntityType.SKELETON) {
+				Skeleton mob = (Skeleton) Bukkit.getWorld(location.getWorld().getName()).spawnEntity(location, ent);
+				mob.setMaxHealth(getConfig().getInt("Bosses.Config.SKELETON.Health"));
+				mob.setHealth(mob.getMaxHealth());
+				upd("Bosses.Entitys." + mob.getEntityId() + ".Alive", true);
+			}
 		}
 	}
 
@@ -298,6 +311,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (!getConfig().isSet("Drops")) {
 			this.upd("Drops.ZOMBIE", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
 			this.upd("Drops.CREEPER", "GOLD_INGOT,GOLD_INGOT");
+		}
+		if (!getConfig().isSet("Bosses")) {
+			this.upd("Bosses.Config.SKELETON.Health", 200); //Boss health
+			this.upd("Bosses.Config.SKELETON.Loot", "GOLD_INGOT,GOLD_INGOT"); //Boss health
 		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
@@ -571,13 +588,30 @@ public class RPG2 extends JavaPlugin implements Listener {
 				taken.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage recieved: " + event.getDamage() + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
 		}
+		if (event.getEntity() instanceof Skeleton) {
+			Entity ent = event.getEntity();
+			if (getConfig().isSet("Bosses.Entitys." + ent.getEntityId())) {
+				if (getConfig().getBoolean("Bosses.Entitys." + ent.getEntityId() + ".Alive") == true) {
+					Bukkit.getWorld(ent.getLocation().getWorld().getName()).spawnEntity(ent.getLocation(), EntityType.SILVERFISH);
+				}
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
 	public void onEntityDeath(EntityDeathEvent event) {
 		if (!(event.getEntity() instanceof Player)) {
-			if (getConfig().isSet("Drops." + event.getEntityType().getName().toUpperCase())) {
-				String[] d = getConfig().getString("Drops." + event.getEntityType().getName().toUpperCase()).split(",");
+			String[] d;
+			if (getConfig().isSet("Bosses.Entitys." + event.getEntity().getEntityId())) {
+				upd("Bosses.Entitys." + event.getEntity().getEntityId() + ".Alive", false);
+				d = getConfig().getString("Bosses.Config." + event.getEntityType().name() + ".Loot").split(",");
+				try {
+					event.getDrops().clear();
+					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
+				} catch (Exception e) {} 
+			} 
+			else if (getConfig().isSet("Drops." + event.getEntityType().getName().toUpperCase())) {
+				d = getConfig().getString("Drops." + event.getEntityType().getName().toUpperCase()).split(",");
 				try {
 					event.getDrops().clear();
 					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
@@ -697,6 +731,17 @@ public class RPG2 extends JavaPlugin implements Listener {
 				String blockloc = loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ() + "," + loc.getWorld().getName();
 				upd("Loot." + blockloc, args[0].replaceAll("_", " "));
 				player.sendMessage("Chest defined.");
+				return true;
+			}
+		}
+
+		if (commandLabel.equalsIgnoreCase("boss") && player.isOp()) {
+			if (args.length == 0) {
+				player.sendMessage("No boss specified.");
+				return true;
+			} else {
+				spawnBoss(player.getLocation(), args[0]);
+				player.sendMessage("Boss spawned.");
 				return true;
 			}
 		}
