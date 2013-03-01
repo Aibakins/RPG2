@@ -17,6 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Wolf;
@@ -139,6 +140,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 				mob.setMaxHealth(getConfig().getInt("Bosses.Config.SKELETON.Health"));
 				mob.setHealth(mob.getMaxHealth());
 				upd("Bosses.Entitys." + mob.getEntityId() + ".Alive", true);
+			} else if (ent == EntityType.GIANT) {
+				Giant mob = (Giant) Bukkit.getWorld(location.getWorld().getName()).spawnEntity(location, ent);
+				mob.setMaxHealth(getConfig().getInt("Bosses.Config.GIANT.Health"));
+				mob.setHealth(mob.getMaxHealth());
 			}
 		}
 	}
@@ -314,7 +319,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 		if (!getConfig().isSet("Bosses")) {
 			this.upd("Bosses.Config.SKELETON.Health", 200); //Boss health
-			this.upd("Bosses.Config.SKELETON.Loot", "GOLD_INGOT,GOLD_INGOT"); //Boss health
+			this.upd("Bosses.Config.SKELETON.Loot", "GOLD_INGOT,GOLD_INGOT,Regener"); //Boss health
+			this.upd("Bosses.Config.GIANT.Health", 400); //Boss health
+			this.upd("Bosses.Config.GIANT.Loot", "GOLD_INGOT,GOLD_INGOT"); //Boss health
+			this.upd("Bosses.Config.GIANT.Damage", 10); //Boss health
 		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
@@ -359,6 +367,11 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (player.isSprinting()) {
 			if (player.getFoodLevel() > 3) {
 				player.setFoodLevel(player.getFoodLevel() - rand.nextInt(2));
+			}
+		}
+		for (Entity ent : player.getNearbyEntities(2, 2, 2)) {
+			if (ent.getType() == EntityType.GIANT) {
+				player.damage(getConfig().getInt("Bosses.Config.GIANT.Damage"));
 			}
 		}
 	}
@@ -604,7 +617,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			String[] d;
 			if (getConfig().isSet("Bosses.Entitys." + event.getEntity().getEntityId())) {
 				upd("Bosses.Entitys." + event.getEntity().getEntityId() + ".Alive", false);
-				d = getConfig().getString("Bosses.Config." + event.getEntityType().name() + ".Loot").split(",");
+				d = getConfig().getString("Bosses.Config." + event.getEntityType().name().toUpperCase() + ".Loot").split(",");
 				try {
 					event.getDrops().clear();
 					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));

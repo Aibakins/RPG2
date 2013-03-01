@@ -17,13 +17,13 @@ Current Features
 * Damage display
 * Different repair system (anvil right click only to prevent item renaming)
 * WoW styled hearthstone (With custom item)
-* Boss Mobs: Skelebum
+* Boss Mobs: Skelebum & Giants (Configurable)
 
 To add
 ====
 * Merchant Traders instead of a stupid sign shop
 * Rage (displayed using the XP bar) (Working on at the moment)
-* Boss Mobs: Giants, Spider Jocks, and Wither
+* Boss Mobs: Wither
 * Perhaps an Attribute to increase armor. 
 
 Item Attributes (Also works on Armor)
