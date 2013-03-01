@@ -15,11 +15,14 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Bat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Witch;
+import org.bukkit.entity.Wither;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -144,6 +147,16 @@ public class RPG2 extends JavaPlugin implements Listener {
 				Giant mob = (Giant) Bukkit.getWorld(location.getWorld().getName()).spawnEntity(location, ent);
 				mob.setMaxHealth(getConfig().getInt("Bosses.Config.GIANT.Health"));
 				mob.setHealth(mob.getMaxHealth());
+				upd("Bosses.Entitys." + mob.getEntityId() + ".Alive", true);
+			} else if (ent == EntityType.WITCH) {
+				Witch mob = (Witch) Bukkit.getWorld(location.getWorld().getName()).spawnEntity(location, ent);
+				Bat bat = (Bat) Bukkit.getWorld(location.getWorld().getName()).spawnEntity(location, EntityType.BAT);
+				mob.setMaxHealth(getConfig().getInt("Bosses.Config.WITCH.Health"));
+				mob.setHealth(mob.getMaxHealth());
+				bat.setMaxHealth(getConfig().getInt("Bosses.Config.WITCH.Health"));
+				bat.setHealth(mob.getMaxHealth());
+				bat.setPassenger(mob);
+				upd("Bosses.Entitys." + mob.getEntityId() + ".Alive", true);
 			}
 		}
 	}
@@ -323,6 +336,8 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Bosses.Config.GIANT.Health", 400); //Boss health
 			this.upd("Bosses.Config.GIANT.Loot", "GOLD_INGOT,GOLD_INGOT"); //Boss health
 			this.upd("Bosses.Config.GIANT.Damage", 10); //Boss health
+			this.upd("Bosses.Config.WITCH.Health", 1000); //Boss health
+			this.upd("Bosses.Config.WITCH.Loot", "GOLD_INGOT,GOLD_INGOT,Regener"); //Boss health
 		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
@@ -369,7 +384,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				player.setFoodLevel(player.getFoodLevel() - rand.nextInt(2));
 			}
 		}
-		for (Entity ent : player.getNearbyEntities(2, 2, 2)) {
+		for (Entity ent : player.getNearbyEntities(2, 3, 2)) {
 			if (ent.getType() == EntityType.GIANT) {
 				player.damage(getConfig().getInt("Bosses.Config.GIANT.Damage"));
 			}

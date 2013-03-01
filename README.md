@@ -23,8 +23,8 @@ To add
 ====
 * Merchant Traders instead of a stupid sign shop
 * Rage (displayed using the XP bar) (Working on at the moment)
-* Boss Mobs: Wither
-* Perhaps an Attribute to increase armor. 
+* Boss Mobs: Flying Witch!
+* Perhaps an Attribute to increase armor.
 
 Item Attributes (Also works on Armor)
 ====
