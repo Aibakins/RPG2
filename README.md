@@ -18,6 +18,8 @@ Current Features
 * Different repair system (anvil right click only to prevent item renaming)
 * WoW styled hearthstone (With custom item)
 * Boss Mobs: Skelebum, Flying Witch & Giants (Configurable)
+* Custom mob health
+* Make gold drop instead of EXP.
 
 To add
 ====

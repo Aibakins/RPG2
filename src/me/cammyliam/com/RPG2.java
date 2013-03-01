@@ -16,11 +16,13 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Bat;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Spider;
 import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
@@ -31,6 +33,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
@@ -317,6 +320,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Options.default-bankslots", 9);
 			this.upd("Options.first-time-join", "world,-140,4,-23");
 			this.upd("Options.respawn", "world,-140,4,-23");
+			this.upd("Options.EXPtoGold", true);
 			this.upd("Options.Anvil.Price", 13);
 			this.upd("Options.Anvil.DuraToAdd", 60);
 			this.upd("Options.Tools.SafeDropToolID", 352);
@@ -325,9 +329,15 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (!getConfig().isSet("Loot")) {
 			this.upd("Loot.defaultloot", "GOLD_INGOT,");
 		}
-		if (!getConfig().isSet("Drops")) {
-			this.upd("Drops.ZOMBIE", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
-			this.upd("Drops.CREEPER", "GOLD_INGOT,GOLD_INGOT");
+		if (!getConfig().isSet("Mobs")) {
+			this.upd("Mobs.ZOMBIE.Drops", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
+			this.upd("Mobs.CREEPER.Drops", "GOLD_INGOT,GOLD_INGOT");
+			this.upd("Mobs.SPIDER.Drops", "GOLD_INGOT,");
+			this.upd("Mobs.SKELETON.Drops", "GOLD_INGOT,");
+			this.upd("Mobs.ZOMBIE.Health", 25); //This allows you to change the mobs health
+			this.upd("Mobs.CREEPER.Health", 30);
+			this.upd("Mobs.SPIDER.Health", 20);
+			this.upd("Mobs.SKELETON.Health", 35);
 		}
 		if (!getConfig().isSet("Bosses")) {
 			this.upd("Bosses.Config.SKELETON.Health", 200); //Boss health
@@ -629,6 +639,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 	public void onEntityDeath(EntityDeathEvent event) {
 		if (!(event.getEntity() instanceof Player)) {
 			String[] d;
+			if (getConfig().getBoolean("Options.EXPtoGold")) {
+				event.getEntity().getWorld().dropItem(event.getEntity().getLocation(), new ItemStack(Material.GOLD_INGOT, event.getDroppedExp()));
+				event.setDroppedExp(0);
+			}
 			if (getConfig().isSet("Bosses.Entitys." + event.getEntity().getEntityId())) {
 				upd("Bosses.Entitys." + event.getEntity().getEntityId() + ".Alive", false);
 				d = getConfig().getString("Bosses.Config." + event.getEntityType().name().toUpperCase() + ".Loot").split(",");
@@ -637,8 +651,8 @@ public class RPG2 extends JavaPlugin implements Listener {
 					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
 				} catch (Exception e) {} 
 			} 
-			else if (getConfig().isSet("Drops." + event.getEntityType().getName().toUpperCase())) {
-				d = getConfig().getString("Drops." + event.getEntityType().getName().toUpperCase()).split(",");
+			else if (getConfig().isSet("Mobs." + event.getEntityType().getName().toUpperCase() + ".Drops")) {
+				d = getConfig().getString("Mobs." + event.getEntityType().getName().toUpperCase() + ".Drops").split(",");
 				try {
 					event.getDrops().clear();
 					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
@@ -647,6 +661,30 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.LOW)
+	public void onEntitySpawn(CreatureSpawnEvent event) {
+		Entity ent = event.getEntity();
+		if (getConfig().isSet("Mobs." + event.getEntityType().getName().toUpperCase())) {
+			if (event.getEntityType() == EntityType.ZOMBIE) {
+				Zombie mob = (Zombie) ent;
+				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				mob.setHealth(mob.getMaxHealth());
+			} else if (event.getEntityType() == EntityType.SKELETON) {
+				Skeleton mob = (Skeleton) ent;
+				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				mob.setHealth(mob.getMaxHealth());
+			} else if (event.getEntityType() == EntityType.SPIDER) {
+				Spider mob = (Spider) ent;
+				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				mob.setHealth(mob.getMaxHealth());
+			} else if (event.getEntityType() == EntityType.CREEPER) {
+				Creeper mob = (Creeper) ent;
+				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				mob.setHealth(mob.getMaxHealth());
+			}
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.LOW)
 	public void onTargetChange(EntityTargetEvent event) {
 		if (getConfig().isSet("Mobs." + event.getEntity().getEntityId())) {
