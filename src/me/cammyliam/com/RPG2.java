@@ -15,6 +15,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -22,7 +23,6 @@ import org.bukkit.entity.Giant;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Witch;
-import org.bukkit.entity.Wither;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -206,7 +206,11 @@ public class RPG2 extends JavaPlugin implements Listener {
 			lore = new ArrayList<String>();
 			lore.add(ChatColor.BLUE + getConfig().getString("Items." + name + ".Lore"));
 			if (getConfig().getInt("Items." + name + ".Damage") != 0) {
-				lore.add(ChatColor.RED + "Damage: " + getConfig().getInt("Items." + name + ".Damage"));
+				if (getConfig().getInt("Items." + name + ".Actual-Item") == 261) {
+					is.addEnchantment(Enchantment.ARROW_DAMAGE, getConfig().getInt("Items." + name + ".Damage"));
+				} else {
+					lore.add(ChatColor.RED + "Damage: " + getConfig().getInt("Items." + name + ".Damage"));
+				}
 			}
 			if (getConfig().getInt("Items." + name + ".HP") != 0) {
 				lore.add(ChatColor.GREEN + "Health+: " + getConfig().getInt("Items." + name + ".HP"));
@@ -341,7 +345,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
-			this.upd("Items.Regener.Actual-Item", 276); //item texture
+			this.upd("Items.Regener.Actual-Item", 261); //item texture
 			this.upd("Items.Regener.Dura", 200); //Custom durability, 0 for default (broken)
 			this.upd("Items.Regener.Value", 24); //Cost of item
 			this.upd("Items.Regener.Damage", 20); //How much damage the weapon done
