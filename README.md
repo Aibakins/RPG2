@@ -20,6 +20,7 @@ Current Features
 * Boss Mobs: Skelebum, Flying Witch & Giants (Configurable)
 * Custom mob health
 * Make gold drop instead of EXP.
+* Player visibility for OPs.
 
 To add
 ====

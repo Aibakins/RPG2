@@ -414,7 +414,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-
 		if (!getConfig().isSet("Players." + player.getName())) {
 			player.teleport(new Location(Bukkit.getWorld("world"), -140, 4, -23));
 			upd("Players." + player.getName() + ".dropto", "null");
@@ -439,6 +438,12 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im.setLore(lore);
 			is.setItemMeta(im);
 			player.getInventory().addItem(is);
+		}
+		if (player.isOp()) {
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.hidePlayer(player);
+			}
+			player.sendMessage(ChatColor.YELLOW + "You are currently visable.");
 		}
 	}
 
@@ -808,6 +813,32 @@ public class RPG2 extends JavaPlugin implements Listener {
 				spawnBoss(player.getLocation(), args[0]);
 				player.sendMessage("Boss spawned.");
 				return true;
+			}
+		}
+		
+
+
+		if (commandLabel.equalsIgnoreCase("vis") && player.isOp()) {
+			if (args.length == 0) {
+				player.sendMessage("No argument specified.");
+				return true;
+			} else {
+				if (args[0].equalsIgnoreCase("hide")) {
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						p.hidePlayer(player);
+					}
+					player.sendMessage("You are now hidden.");
+					return true;
+				} else if (args[0].equalsIgnoreCase("show")) {
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						p.showPlayer(player);
+					}
+					player.sendMessage("You are now visable.");
+					return true;
+				} else {
+					player.sendMessage("Wrong argument specified.");
+					return true;
+				}
 			}
 		}
 
