@@ -403,7 +403,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im = is.getItemMeta();
 			im.setDisplayName("Safe-Drop Tool");
 			lore = new ArrayList<String>();
-			lore.add(ChatColor.GOLD + "Use this item to safe-drop. (Soulbound)");
+			lore.add(ChatColor.GOLD + "Use this item to safe-drop.");
 			im.setLore(lore);
 			is.setItemMeta(im);
 			player.getInventory().addItem(is);
@@ -411,7 +411,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im = is.getItemMeta();
 			im.setDisplayName("Hearthstone");
 			lore = new ArrayList<String>();
-			lore.add(ChatColor.GOLD + "Use this item to return to the Hearthstone home. (Soulbound)");
+			lore.add(ChatColor.GOLD + "Use this item to return to the Hearthstone home.");
 			im.setLore(lore);
 			is.setItemMeta(im);
 			player.getInventory().addItem(is);
