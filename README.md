@@ -24,15 +24,14 @@ Current Features
 To add
 ====
 * Merchant Traders instead of a stupid sign shop
-* Rage (displayed using the XP bar) (Working on at the moment)
-* Perhaps an Attribute to increase armor.
+* Rage (displayed using the XP bar) (Saving till last)
 
-Item Attributes (Also works on Armor)
+Item Attributes (damage/lifesteal does not affect bows or Armor)
 ====
 * Custom damage (for weapons)
 * Add health to the player
 * Stamina regeneration
 * Health regeneration
 * Life steal (for weapons)
-* Dodge (WIP)
-* Custom durability (WIP)
+* Dodge
+* Custom durability (Bit weird how it works)
