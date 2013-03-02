@@ -674,7 +674,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (getConfig().isSet("Mobs." + event.getEntityType().getName().toUpperCase())) {
 			if (event.getEntityType() == EntityType.ZOMBIE) {
 				Zombie mob = (Zombie) ent;
-				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange") && ent.getWorld() == getSpawn().getWorld()) {
 					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
 				} else {
 					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
@@ -682,7 +682,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.SKELETON) {
 				Skeleton mob = (Skeleton) ent;
-				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange") && ent.getWorld() == getSpawn().getWorld()) {
 					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
 				} else {
 					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
@@ -690,7 +690,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.SPIDER) {
 				Spider mob = (Spider) ent;
-				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange") && ent.getWorld() == getSpawn().getWorld()) {
 					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
 				} else {
 					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
@@ -698,7 +698,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.CREEPER) {
 				Creeper mob = (Creeper) ent;
-				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange") && ent.getWorld() == getSpawn().getWorld()) {
 					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
 				} else {
 					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
@@ -831,6 +831,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (commandLabel.equalsIgnoreCase("rpgr") && player.isOp()) {
 			plugin.reloadConfig();
 			player.sendMessage("Config reloaded.");
+			return true;
 		}
 
 		if (commandLabel.equalsIgnoreCase("vis") && player.isOp()) {
