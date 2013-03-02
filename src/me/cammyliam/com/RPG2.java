@@ -1,4 +1,3 @@
-//EDIT TEST
 package me.cammyliam.com;
 
 import java.io.File;
@@ -15,6 +14,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -329,7 +329,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Options.EXPtoGold", true);
 			this.upd("Options.Anvil.Price", 13);
 			this.upd("Options.Anvil.DuraToAdd", 60);
-			this.upd("Options.Tools.SafeDropToolID", 352);
 			this.upd("Options.Tools.HearthstoneID", 399);
 		}
 		if (!getConfig().isSet("Loot")) {
@@ -406,15 +405,8 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 	}
 
-	/*public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-		Entity en = e.getRightClicked();
-		if (en instanceof Villager) {
-			if (getConfig().isSet("Merchant.i" + en.getEntityId() + "i")) {
-				String[] i = getConfig().getString("Merchant.i" + en.getEntityId() + "i.info").split("-");
-				Villager v = (Villager) en;
-				v.
-			}
-		}
+	/*public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+		Entity en = event.getRightClicked();
 	}*/
 
 	@EventHandler(priority = EventPriority.LOW)
@@ -428,14 +420,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 			ItemStack is;
 			ItemMeta im;
 			ArrayList<String> lore;
-			is = new ItemStack(Material.getMaterial(getConfig().getInt("Options.Tools.SafeDropToolID")), 1);
-			im = is.getItemMeta();
-			im.setDisplayName("Safe-Drop Tool");
-			lore = new ArrayList<String>();
-			lore.add(ChatColor.GOLD + "Use this item to safe-drop.");
-			im.setLore(lore);
-			is.setItemMeta(im);
-			player.getInventory().addItem(is);
 			is = new ItemStack(Material.getMaterial(getConfig().getInt("Options.Tools.HearthstoneID")), 1);
 			im = is.getItemMeta();
 			im.setDisplayName("Hearthstone");
@@ -447,7 +431,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 		if (player.isOp()) {
 			for (Player p : Bukkit.getOnlinePlayers()) {
-				p.hidePlayer(player);
+				p.showPlayer(player);
 			}
 			player.sendMessage(ChatColor.YELLOW + "You are currently visable.");
 		}
@@ -464,11 +448,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 
 		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
 			if (player.getItemInHand().getItemMeta().hasDisplayName()) {
-				if (player.getItemInHand().getItemMeta().getDisplayName().equals("Safe-Drop Tool")) {
-					upd("Players." + player.getName() + ".dropto", "null");
-					player.sendMessage("Drops set to: free-for-all");
-				}
-				else if (player.getItemInHand().getItemMeta().getDisplayName().equals("Hearthstone")) {
+				if (player.getItemInHand().getItemMeta().getDisplayName().equals("Hearthstone")) {
 					try {
 						player.teleport(getHearthstone(player));
 						player.sendMessage("You have been teleported to your Hearthstone's location.");
@@ -598,18 +578,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 						Damage = Damage + returnLifeSteal(given.getItemInHand().getItemMeta().getDisplayName());
 						given.setHealth(given.getHealth() + returnLifeSteal(given.getItemInHand().getItemMeta().getDisplayName()));
 					}
-				} else if (given.getItemInHand().getType() == Material.getMaterial(getConfig().getInt("Options.Tools.SafeDropToolID"))) {
-					if (given.getItemInHand().getItemMeta().hasDisplayName()) {
-						if (given.getItemInHand().getItemMeta().getDisplayName() == "Safe-Drop Tool") {
-							if (event.getEntity() instanceof Player) {
-								event.setCancelled(true);
-								Damage = 0;
-								Player taken = (Player) event.getEntity();
-								given.sendMessage("Drops set to: " + taken.getName() + " only");
-								upd("Players." + given.getName() + ".dropto", taken.getName());
-							}
-						}
-					}
 				}
 			} catch (Exception e) {}
 			if (getConfig().isSet("Mobs." + event.getEntity().getEntityId())) {
@@ -628,18 +596,35 @@ public class RPG2 extends JavaPlugin implements Listener {
 			event.setDamage(Damage);
 		}
 		if (event.getEntity() instanceof Player) {
+			int Damage = 0;
 			if (getConfig().isSet("Mobs." + event.getDamager().getEntityId())) {
 				event.setCancelled(true);
-				event.setDamage(0);
+				Damage = 0;
+			}
+			if (event.getDamager() instanceof Arrow) {
+				Arrow ar = (Arrow) event.getDamager();
+				if (ar.getShooter() instanceof Player) {
+					Player shooter = (Player) ar.getShooter();
+					if (shooter.getItemInHand().getItemMeta().hasDisplayName()) {
+						try {
+							Damage = returnDamage(shooter.getItemInHand().getItemMeta().getDisplayName()) - rand.nextInt(returnDamage(shooter.getItemInHand().getItemMeta().getDisplayName()) / 3);
+						} catch (Exception e) {Damage = event.getDamage();}
+						if (returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName()) != 0) {
+							Damage = Damage + returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName());
+							shooter.setHealth(shooter.getHealth() + returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName()));
+						}
+					}
+				}
 			}
 			Player taken = (Player) event.getEntity();
 			taken.setLevel(taken.getHealth());
 			if (rand.nextInt(150 - returnCFGDodge(taken)) == 1) {
-				event.setDamage(0);
+				Damage = 0;
 			}
-			if (event.getDamage() > 0) {
+			if (Damage > 0) {
 				taken.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage recieved: " + event.getDamage() + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
+			event.setDamage(Damage);
 		}
 		if (event.getEntity() instanceof Skeleton) {
 			Entity ent = event.getEntity();

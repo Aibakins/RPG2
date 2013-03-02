@@ -11,7 +11,6 @@ Current Features
 * Custom spawns
 * New stamina system
 * Awesome player banks (with a custom amount of slots)
-* Secure drops (drop to one person only)
 * Awesowme loot system. (Only get items from a chest once)
 * Sign shops
 * Damage display
