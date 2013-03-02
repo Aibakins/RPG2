@@ -15,8 +15,10 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
@@ -158,6 +160,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				bat.setMaxHealth(getConfig().getInt("Bosses.Config.WITCH.Health"));
 				bat.setHealth(mob.getMaxHealth());
 				bat.setPassenger(mob);
+				bat.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 72000, 1));
 				upd("Bosses.Entitys." + mob.getEntityId() + ".Alive", true);
 			}
 		}
