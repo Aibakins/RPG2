@@ -15,10 +15,8 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Giant;
@@ -199,7 +197,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, xam));
 	}
 
-	public ItemStack returnItem(String name) {
+	public ItemStack returnItem(String name, int amount, short dura) {
 		ItemStack is = null;
 		ItemMeta im;
 		ArrayList<String> lore;
@@ -228,9 +226,14 @@ public class RPG2 extends JavaPlugin implements Listener {
 			if (getConfig().getInt("Items." + name + ".Dodge") != 0) {
 				lore.add(ChatColor.DARK_GREEN + "Dodge+: " + getConfig().getInt("Items." + name + ".Dodge"));
 			}
-			if (getConfig().getInt("Items." + name + ".Dura") != 0) {
-				is.setDurability((short) (getConfig().getInt("Items." + name + ".Dura")));
+			if (dura == 0) {
+				if (getConfig().getInt("Items." + name + ".Dura") != 0) {
+					is.setDurability((short) (getConfig().getInt("Items." + name + ".Dura")));
+				}
+			} else {
+				is.setDurability(dura);
 			}
+
 			if (d != "") {
 				lore.add(d);
 			}
@@ -238,7 +241,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			is.setItemMeta(im);
 		} else {
 			try {
-				is = new ItemStack(Material.getMaterial(name.toUpperCase()), 1);
+				is = new ItemStack(Material.getMaterial(name.toUpperCase()), amount);
 			} catch (Exception e) {
 				is = new ItemStack(Material.AIR);
 			}
@@ -484,17 +487,19 @@ public class RPG2 extends JavaPlugin implements Listener {
 			if (block.getType() == Material.ENDER_CHEST) {
 				player.sendMessage("Bank chest opened.");
 				int s = 0;
-				event.getPlayer().getEnderChest().remove(Material.SIGN_POST);
-				for (ItemStack i : event.getPlayer().getEnderChest().getContents()) {
-					if (s >= getConfig().getInt("Players." + event.getPlayer().getName() + ".Bank")) {
-						if (i != null && i.getType() != Material.SIGN_POST) {
-							Bukkit.getWorld(event.getPlayer().getWorld().getName()).dropItem(event.getPlayer().getLocation(), i);
+				String[] d;
+				event.setCancelled(true);
+				Inventory inv = Bukkit.createInventory(player, getConfig().getInt("Options.default-bankslots"), player.getName() + "'s Bank");
+				if (getConfig().isSet("Players." + event.getPlayer().getName() + ".bankinv")) {
+					for (ItemStack i : inv.getContents()) {
+						if (getConfig().getString("Players." + event.getPlayer().getName() + ".bankinv.slot" + s) != "nothing") {
+							d = getConfig().getString("Players." + event.getPlayer().getName() + ".bankinv.slot" + s).split(",");
+							inv.setItem(s, returnItem(d[0], Integer.parseInt(d[1]), Short.parseShort(d[2])));
+							s++;
 						}
-						event.getPlayer().getEnderChest().setItem(s, new ItemStack(Material.SIGN_POST));
 					}
-					s++;
 				}
-				event.getPlayer().getInventory().remove(Material.SIGN_POST);
+				player.openInventory(inv);
 			}
 			if (block.getType() == Material.CHEST) {
 				if (!getConfig().isSet("Players." + player.getName() + ".Looted")) {
@@ -508,13 +513,13 @@ public class RPG2 extends JavaPlugin implements Listener {
 					if (getConfig().isSet("Loot." + blockloc)) {
 						for (String item : getConfig().getString("Loot." + blockloc).split(",")) {
 							try {
-								inv.addItem(returnItem(item));
+								inv.addItem(returnItem(item, 1, Short.parseShort("0")));
 							} catch(Exception e) {}
 						}
 					} else {
 						for (String item : getConfig().getString("Loot.defaultloot").split(",")) {
 							try {
-								inv.addItem(returnItem(item));
+								inv.addItem(returnItem(item, 1, Short.parseShort("0")));
 							} catch(Exception e) {}
 						}
 					}
@@ -538,7 +543,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 					if (money(player) >= Integer.parseInt(sign.getLine(2))) {
 						try {
 							rmoney(player, Integer.parseInt(sign.getLine(2)));
-							player.getInventory().addItem(returnItem(sign.getLine(1)));
+							player.getInventory().addItem(returnItem(sign.getLine(1), 1, Short.parseShort("0")));
 							player.sendMessage("You bought " + sign.getLine(1) + " for " + sign.getLine(2) + " Gold.");
 						} catch(Exception e) {
 							player.sendMessage("There was problem trying to buy this item.");
@@ -563,17 +568,20 @@ public class RPG2 extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW)
 	public void onInventoryClose(InventoryCloseEvent event) {
-		int s = 0;
-		for (ItemStack i : event.getPlayer().getEnderChest().getContents()) {
-			if (s >= getConfig().getInt("Players." + event.getPlayer().getName() + ".Bank")) {
-				if (i != null && i.getType() != Material.SIGN_POST) {
-					Bukkit.getWorld(event.getPlayer().getWorld().getName()).dropItem(event.getPlayer().getLocation(), i);
+		if (event.getInventory().getTitle().equals(event.getPlayer().getName() + "'s Bank")){
+			int s = 0;
+			for (ItemStack i : event.getInventory().getContents()) {
+				upd("Players." + event.getPlayer().getName() + ".bankinv.slot" + s, "nothing");
+				if (i != null) {
+					if (i.getItemMeta().hasDisplayName()) {
+						upd("Players." + event.getPlayer().getName() + ".bankinv.slot" + s, i.getItemMeta().getDisplayName() + "," + i.getAmount() + "," + i.getDurability());
+					} else {
+						upd("Players." + event.getPlayer().getName() + ".bankinv.slot" + s, i.getType().name().toUpperCase() + "," + i.getAmount() + "," + i.getDurability());
+					}
 				}
-				event.getPlayer().getEnderChest().setItem(s, new ItemStack(Material.SIGN_POST));
+				s++;
 			}
-			s++;
 		}
-		event.getPlayer().getInventory().remove(Material.SIGN_POST);
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
@@ -656,14 +664,14 @@ public class RPG2 extends JavaPlugin implements Listener {
 				d = getConfig().getString("Bosses.Config." + event.getEntityType().name().toUpperCase() + ".Loot").split(",");
 				try {
 					event.getDrops().clear();
-					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
+					event.getDrops().add(returnItem(d[rand.nextInt(d.length)], 1, Short.parseShort("0")));
 				} catch (Exception e) {} 
 			} 
 			else if (getConfig().isSet("Mobs." + event.getEntityType().getName().toUpperCase() + ".Drops")) {
 				d = getConfig().getString("Mobs." + event.getEntityType().getName().toUpperCase() + ".Drops").split(",");
 				try {
 					event.getDrops().clear();
-					event.getDrops().add(returnItem(d[rand.nextInt(d.length)]));
+					event.getDrops().add(returnItem(d[rand.nextInt(d.length)], 1, Short.parseShort("0")));
 				} catch (Exception e) {} 
 			}
 		}
@@ -753,7 +761,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				return true;
 			} else {
 				String name = args[0].replaceAll("_", " ");
-				player.getInventory().addItem(returnItem(name));
+				player.getInventory().addItem(returnItem(name, 1, Short.parseShort("0")));
 				player.sendMessage("Added.");
 				return true;
 			}

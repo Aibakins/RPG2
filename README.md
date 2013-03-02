@@ -10,7 +10,7 @@ Current Features
 * Money system
 * Custom spawns
 * New stamina system
-* Player banks (with a custom amount of slots)
+* Awesome player banks (with a custom amount of slots)
 * Secure drops (drop to one person only)
 * Awesowme loot system. (Only get items from a chest once)
 * Sign shops
