@@ -689,7 +689,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOW)
 	public void onTargetChange(EntityTargetEvent event) {
 		if (getConfig().isSet("Mobs." + event.getEntity().getEntityId())) {
@@ -815,7 +815,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				return true;
 			}
 		}
-		
+
 
 
 		if (commandLabel.equalsIgnoreCase("vis") && player.isOp()) {
@@ -825,9 +825,11 @@ public class RPG2 extends JavaPlugin implements Listener {
 			} else {
 				if (args[0].equalsIgnoreCase("hide")) {
 					for (Player p : Bukkit.getOnlinePlayers()) {
-						p.hidePlayer(player);
+						if (p.isOp() == false) {
+							p.hidePlayer(player);
+						}
 					}
-					player.sendMessage("You are now hidden.");
+					player.sendMessage("You are now hidden to non-OPs.");
 					return true;
 				} else if (args[0].equalsIgnoreCase("show")) {
 					for (Player p : Bukkit.getOnlinePlayers()) {

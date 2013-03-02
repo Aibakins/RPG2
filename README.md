@@ -27,8 +27,9 @@ To add
 * Merchant Traders instead of a stupid sign shop
 * Rage (displayed using the XP bar) (Saving till last)
 
-Item Attributes (damage/lifesteal does not affect bows or Armor)
+Item Attributes
 ====
+damage/lifesteal does not affect bows or Armor
 * Custom damage (for weapons)
 * Add health to the player
 * Stamina regeneration
