@@ -17,7 +17,7 @@ Current Features
 * Different repair system (anvil right click only to prevent item renaming)
 * WoW styled hearthstone (With custom item)
 * Boss Mobs: Skelebum, Flying Witch & Giants (Configurable)
-* Custom mob health
+* Custom mob health (Configurable or customizeable for how far a mob is from spawn)
 * Make gold drop instead of EXP.
 * Player visibility for OPs.
 

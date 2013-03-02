@@ -197,6 +197,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, xam));
 	}
 
+	public double locDiff(Location a, Location b) {
+		return ((a.distance(b))/10);
+	}
+
 	public ItemStack returnItem(String name, int amount, short dura) {
 		ItemStack is = null;
 		ItemMeta im;
@@ -335,6 +339,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Loot.defaultloot", "GOLD_INGOT,");
 		}
 		if (!getConfig().isSet("Mobs")) {
+			this.upd("Mobs.ChangeHealthByRange", true); //If false, it will use the config below instead
 			this.upd("Mobs.ZOMBIE.Drops", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
 			this.upd("Mobs.CREEPER.Drops", "GOLD_INGOT,GOLD_INGOT");
 			this.upd("Mobs.SPIDER.Drops", "GOLD_INGOT,");
@@ -668,19 +673,35 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (getConfig().isSet("Mobs." + event.getEntityType().getName().toUpperCase())) {
 			if (event.getEntityType() == EntityType.ZOMBIE) {
 				Zombie mob = (Zombie) ent;
-				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
+				} else {
+					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				}
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.SKELETON) {
 				Skeleton mob = (Skeleton) ent;
-				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
+				} else {
+					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				}
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.SPIDER) {
 				Spider mob = (Spider) ent;
-				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
+				} else {
+					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				}
 				mob.setHealth(mob.getMaxHealth());
 			} else if (event.getEntityType() == EntityType.CREEPER) {
 				Creeper mob = (Creeper) ent;
-				mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				if (getConfig().getBoolean("Mobs.ChangeHealthByRange")) {
+					mob.setMaxHealth((int) locDiff(ent.getLocation(), getSpawn()));
+				} else {
+					mob.setMaxHealth(getConfig().getInt("Mobs." + event.getEntityType().getName().toUpperCase() + ".Health"));
+				}
 				mob.setHealth(mob.getMaxHealth());
 			}
 		}
