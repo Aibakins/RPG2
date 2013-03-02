@@ -21,3 +21,6 @@ commands:
     vis:
         description: Visable options
         usage: /vis <hide/show>
+    rpgr:
+        description: Reload the config
+        usage: /rpgr

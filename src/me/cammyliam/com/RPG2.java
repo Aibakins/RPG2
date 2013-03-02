@@ -168,7 +168,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		int c = 0;
 		for (ItemStack i : player.getInventory().getContents()) {
 			if (i != null) {
-				if (i.getType() == Material.GOLD_INGOT) {
+				if (i.getType() == Material.GOLD_NUGGET) {
 					c = c + i.getAmount();
 				}
 			}
@@ -179,7 +179,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		int rem = 0;
 		for (ItemStack i : player.getInventory().getContents()) {
 			if (i != null) {
-				if (i.getType() == Material.GOLD_INGOT) {
+				if (i.getType() == Material.GOLD_NUGGET) {
 					if (rem < xam) { 
 						if (i.getAmount() >= xam) {
 							rem = xam;
@@ -194,7 +194,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 	}
 	public void amoney(Player player, int xam) {
-		player.getInventory().addItem(new ItemStack(Material.GOLD_INGOT, xam));
+		player.getInventory().addItem(new ItemStack(Material.GOLD_NUGGET, xam));
 	}
 
 	public double locDiff(Location a, Location b) {
@@ -270,7 +270,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		int h = getConfig().getInt("Options.default-health");
 		int c = player.getMaxHealth();
 		int r = 0;
-		float s = 1;
+		float s = 5;
 		int d = 0;
 		for (ItemStack item : player.getInventory().getContents()) {
 			if (item != null) {
@@ -330,20 +330,21 @@ public class RPG2 extends JavaPlugin implements Listener {
 			this.upd("Options.default-bankslots", 9);
 			this.upd("Options.first-time-join", "world,-140,4,-23");
 			this.upd("Options.respawn", "world,-140,4,-23");
+			this.upd("Options.building", false);
 			this.upd("Options.EXPtoGold", true);
 			this.upd("Options.Anvil.Price", 13);
 			this.upd("Options.Anvil.DuraToAdd", 60);
 			this.upd("Options.Tools.HearthstoneID", 399);
 		}
 		if (!getConfig().isSet("Loot")) {
-			this.upd("Loot.defaultloot", "GOLD_INGOT,");
+			this.upd("Loot.defaultloot", "GOLD_NUGGET,");
 		}
 		if (!getConfig().isSet("Mobs")) {
 			this.upd("Mobs.ChangeHealthByRange", true); //If false, it will use the config below instead
-			this.upd("Mobs.ZOMBIE.Drops", "Regener,GOLD_INGOT,GOLD_INGOT"); //Example showing that you can use custom items if they're defined.
-			this.upd("Mobs.CREEPER.Drops", "GOLD_INGOT,GOLD_INGOT");
-			this.upd("Mobs.SPIDER.Drops", "GOLD_INGOT,");
-			this.upd("Mobs.SKELETON.Drops", "GOLD_INGOT,");
+			this.upd("Mobs.ZOMBIE.Drops", "Regener,GOLD_NUGGET,GOLD_NUGGET"); //Example showing that you can use custom items if they're defined.
+			this.upd("Mobs.CREEPER.Drops", "GOLD_NUGGET,GOLD_NUGGET");
+			this.upd("Mobs.SPIDER.Drops", "GOLD_NUGGET,");
+			this.upd("Mobs.SKELETON.Drops", "GOLD_NUGGET,");
 			this.upd("Mobs.ZOMBIE.Health", 25); //This allows you to change the mobs health
 			this.upd("Mobs.CREEPER.Health", 30);
 			this.upd("Mobs.SPIDER.Health", 20);
@@ -351,12 +352,12 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 		if (!getConfig().isSet("Bosses")) {
 			this.upd("Bosses.Config.SKELETON.Health", 200); //Boss health
-			this.upd("Bosses.Config.SKELETON.Loot", "GOLD_INGOT,GOLD_INGOT,Regener"); //Boss health
+			this.upd("Bosses.Config.SKELETON.Loot", "GOLD_NUGGET,GOLD_NUGGET,Regener"); //Boss health
 			this.upd("Bosses.Config.GIANT.Health", 400); //Boss health
-			this.upd("Bosses.Config.GIANT.Loot", "GOLD_INGOT,GOLD_INGOT"); //Boss health
+			this.upd("Bosses.Config.GIANT.Loot", "GOLD_NUGGET,GOLD_NUGGET"); //Boss health
 			this.upd("Bosses.Config.GIANT.Damage", 10); //Boss health
 			this.upd("Bosses.Config.WITCH.Health", 1000); //Boss health
-			this.upd("Bosses.Config.WITCH.Loot", "GOLD_INGOT,GOLD_INGOT,Regener"); //Boss health
+			this.upd("Bosses.Config.WITCH.Loot", "GOLD_NUGGET,GOLD_NUGGET,Regener"); //Boss health
 		}
 		if (!getConfig().isSet("Items")) {
 			this.upd("Items.Regener.Lore", "Scroll of Regeneration");
@@ -646,7 +647,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (!(event.getEntity() instanceof Player)) {
 			String[] d;
 			if (getConfig().getBoolean("Options.EXPtoGold")) {
-				event.getEntity().getWorld().dropItem(event.getEntity().getLocation(), new ItemStack(Material.GOLD_INGOT, event.getDroppedExp()));
+				event.getEntity().getWorld().dropItem(event.getEntity().getLocation(), new ItemStack(Material.GOLD_NUGGET, event.getDroppedExp()));
 				event.setDroppedExp(0);
 			}
 			if (getConfig().isSet("Bosses.Entitys." + event.getEntity().getEntityId())) {
@@ -727,34 +728,27 @@ public class RPG2 extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
-	public void onItemDrop(PlayerDropItemEvent event) {
-		Player dropper = event.getPlayer();
-
-		if (!(getConfig().getString("Players." + dropper.getName() + ".dropto") == "null")) {
-			Player dropto = Bukkit.getPlayer(getConfig().getString("Players." + dropper.getName() + ".dropto"));
-			dropto.getInventory().addItem(event.getItemDrop().getItemStack());
-			event.getItemDrop().remove();
-		} 
-	}
-
-	@EventHandler(priority = EventPriority.LOW)
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if (event.getPlayer().isOp() == false) {
-			event.setCancelled(true);
-		} else {
-			if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+		if (getConfig().getBoolean("Options.building")) {
+			if (event.getPlayer().isOp() == false) {
 				event.setCancelled(true);
+			} else {
+				if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+					event.setCancelled(true);
+				}
 			}
 		}
 	}
 
 	@EventHandler(priority = EventPriority.LOW)
 	public void onBlockBreak(BlockBreakEvent event) {
-		if (event.getPlayer().isOp() == false) {
-			event.setCancelled(true);
-		} else {
-			if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+		if (getConfig().getBoolean("Options.building")) {
+			if (event.getPlayer().isOp() == false) {
 				event.setCancelled(true);
+			} else {
+				if (event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+					event.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -834,6 +828,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 
 
+		if (commandLabel.equalsIgnoreCase("rpgr") && player.isOp()) {
+			plugin.reloadConfig();
+			player.sendMessage("Config reloaded.");
+		}
 
 		if (commandLabel.equalsIgnoreCase("vis") && player.isOp()) {
 			if (args.length == 0) {
