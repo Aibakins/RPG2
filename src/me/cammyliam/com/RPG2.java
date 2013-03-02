@@ -294,7 +294,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 		}
 		if (h != c) {
-			player.sendMessage(ChatColor.GOLD + "Health changed from " + ChatColor.RED + player.getHealth() + "/" + c + ChatColor.GOLD + " to " + ChatColor.RED + player.getHealth() + "/" + h + ChatColor.GOLD + ".");
 			player.setMaxHealth(h);
 		}
 		player.setLevel(player.getHealth());
