@@ -589,6 +589,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 				event.setCancelled(true);
 				event.setDamage(0);
 			}
+			event.setDamage(Damage);
 			if (Damage > 0) {
 				/*addRage(given, 2);
 				if (returnRage(given) > 96) {
@@ -598,7 +599,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 				}*/
 				given.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage given: " + Damage + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
-			event.setDamage(Damage);
 		}
 		if (event.getEntity() instanceof Player) {
 			int Damage = 0;
@@ -606,30 +606,15 @@ public class RPG2 extends JavaPlugin implements Listener {
 				event.setCancelled(true);
 				Damage = 0;
 			}
-			if (event.getDamager() instanceof Arrow) {
-				Arrow ar = (Arrow) event.getDamager();
-				if (ar.getShooter() instanceof Player) {
-					Player shooter = (Player) ar.getShooter();
-					if (shooter.getItemInHand().getItemMeta().hasDisplayName()) {
-						try {
-							Damage = returnDamage(shooter.getItemInHand().getItemMeta().getDisplayName()) - rand.nextInt(returnDamage(shooter.getItemInHand().getItemMeta().getDisplayName()) / 3);
-						} catch (Exception e) {Damage = event.getDamage();}
-						if (returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName()) != 0) {
-							Damage = Damage + returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName());
-							shooter.setHealth(shooter.getHealth() + returnLifeSteal(shooter.getItemInHand().getItemMeta().getDisplayName()));
-						}
-					}
-				}
-			}
 			Player taken = (Player) event.getEntity();
 			taken.setLevel(taken.getHealth());
 			if (rand.nextInt(150 - returnCFGDodge(taken)) == 1) {
 				Damage = 0;
 			}
+			event.setDamage(Damage);
 			if (Damage > 0) {
 				taken.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage recieved: " + event.getDamage() + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
-			event.setDamage(Damage);
 		}
 		if (event.getEntity() instanceof Skeleton) {
 			Entity ent = event.getEntity();
