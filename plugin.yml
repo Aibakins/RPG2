@@ -21,6 +21,9 @@ commands:
     vis:
         description: Visable options
         usage: /vis <hide/show>
-    rpgr:
-        description: Reload the config
-        usage: /rpgr
+    hs:
+        description: Spawna hearthstone
+        usage: /hs
+    cheque:
+        description: Make a bank cheque
+        usage: /cheque <amount?

@@ -14,7 +14,6 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
@@ -38,7 +37,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -447,9 +445,13 @@ public class RPG2 extends JavaPlugin implements Listener {
 		event.setRespawnLocation(getRespawn());
 	}
 
+	@SuppressWarnings({ "unused", "deprecation" })
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
+		ItemStack is;
+		ItemMeta im;
+		ArrayList<String> lore;
 
 		if (event.getAction() == Action.RIGHT_CLICK_AIR) {
 			if (player.getItemInHand().getItemMeta().hasDisplayName()) {
@@ -467,7 +469,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 		if (event.getClickedBlock() == null) return;
 		Block block = event.getClickedBlock();
 
-
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (block.getType() == Material.ENDER_CHEST) {
 				player.sendMessage("Bank chest opened.");
@@ -479,7 +480,19 @@ public class RPG2 extends JavaPlugin implements Listener {
 					for (ItemStack i : inv.getContents()) {
 						if (getConfig().getString("Players." + event.getPlayer().getName() + ".bankinv.slot" + s) != "nothing") {
 							d = getConfig().getString("Players." + event.getPlayer().getName() + ".bankinv.slot" + s).split(",");
-							inv.setItem(s, returnItem(d[0], Integer.parseInt(d[1]), Short.parseShort(d[2])));
+							if (d[0].startsWith("Bank Cheque")) {
+								is = new ItemStack(Material.PAPER, Integer.parseInt(d[1]));
+								im = is.getItemMeta();
+								im.setDisplayName(d[0]);
+								lore = new ArrayList<String>();
+								lore.add(ChatColor.GOLD + "This can be cashed in for Gold");
+								lore.add(ChatColor.GOLD + "by left clicking on a bank sign.");
+								im.setLore(lore);
+								is.setItemMeta(im);
+								inv.setItem(s, is);
+							} else {
+								inv.setItem(s, returnItem(d[0], Integer.parseInt(d[1]), Short.parseShort(d[2])));
+							}
 							s++;
 						}
 					}
@@ -545,6 +558,57 @@ public class RPG2 extends JavaPlugin implements Listener {
 						upd("Players." + player.getName() + ".hearthstone", loca);
 					} catch (Exception e) {
 						player.sendMessage("There was a problem setting your Hearthstone here.");
+					}
+				}
+				if (sign.getLine(0).equalsIgnoreCase("[bank]")) {
+					if (sign.getLine(1).equalsIgnoreCase("bank cheque")) {
+						if (money(player) >= Integer.parseInt(sign.getLine(2))) {
+							rmoney(player, Integer.parseInt(sign.getLine(2)));
+							is = new ItemStack(Material.PAPER, 1);
+							im = is.getItemMeta();
+							im.setDisplayName("Bank Cheque of " + sign.getLine(2) + " Gold");
+							lore = new ArrayList<String>();
+							lore.add(ChatColor.GOLD + "This can be cashed in for Gold");
+							lore.add(ChatColor.GOLD + "by left clicking on a bank sign.");
+							im.setLore(lore);
+							is.setItemMeta(im);
+							player.getInventory().addItem(is);
+							player.sendMessage("Bank Cheque created and stored in your inventory.");
+							player.updateInventory();
+						} else {
+							player.sendMessage("You don't have " + sign.getLine(2) + " Gold, so you can't create a Cheque.");
+						}
+					}
+				}
+			}
+		}
+
+		if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
+				Sign sign = (Sign) block.getState();
+				if (sign.getLine(0).equalsIgnoreCase("[bank]")) {
+					if (sign.getLine(1).equalsIgnoreCase("bank cheque")) {
+						if (player.getItemInHand() != null) {
+							try {
+								if (player.getItemInHand().getItemMeta().hasDisplayName()) {
+									if (player.getItemInHand().getItemMeta().getDisplayName().startsWith("Bank Cheque")) {
+										String[] d = player.getItemInHand().getItemMeta().getDisplayName().split(" ");
+										try {
+											amoney(player, Integer.parseInt(d[3]));
+											if (player.getItemInHand().getAmount() > 1) {
+												player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+											} else {
+												player.setItemInHand(new ItemStack(Material.AIR));
+											}
+											player.updateInventory();
+											player.sendMessage("Thank you cashing this cheque.");
+										} catch (Exception e) {
+											player.sendMessage("There was an error trying to cash your cheque.");
+										}
+									}
+								}
+							} catch (Exception e) {}
+						}
 					}
 				}
 			}
@@ -739,6 +803,9 @@ public class RPG2 extends JavaPlugin implements Listener {
 
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		Player player = (Player)sender;
+		ItemStack is;
+		ItemMeta im;
+		ArrayList<String> lore;
 		if (commandLabel.equalsIgnoreCase("it") && player.isOp()) {
 			if (args.length == 0) {
 				player.sendMessage("No item specified.");
@@ -774,18 +841,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 		}*/
 
-		/*if (commandLabel.equalsIgnoreCase("test") && player.isOp()) {
-			if (args.length == 0) {
-				if (money(player) > 10) {
-					rmoney(player, 10);
-					player.sendMessage("10 gold removed.");
-				} else {
-					player.sendMessage("Not enough gold.");
-				}
-				return true;
-			}
-		}*/
-
 		if (commandLabel.equalsIgnoreCase("loot") && player.isOp()) {
 			if (args.length == 0) {
 				player.sendMessage("No loot specified.");
@@ -810,11 +865,36 @@ public class RPG2 extends JavaPlugin implements Listener {
 				return true;
 			}
 		}
+		
+		if (commandLabel.equalsIgnoreCase("cheque") && player.isOp()) {
+			if (args.length == 0) {
+				player.sendMessage("No amount specified.");
+				return true;
+			} else {
+				is = new ItemStack(Material.PAPER, 1);
+				im = is.getItemMeta();
+				im.setDisplayName("Bank Cheque of " + args[0] + " Gold");
+				lore = new ArrayList<String>();
+				lore.add(ChatColor.GOLD + "This can be cashed in for Gold");
+				lore.add(ChatColor.GOLD + "by left clicking on a bank sign.");
+				im.setLore(lore);
+				is.setItemMeta(im);
+				player.getInventory().addItem(is);
+				player.sendMessage("Cheque added to your inventory.");
+				return true;
+			}
+		}
 
-
-		if (commandLabel.equalsIgnoreCase("rpgr") && player.isOp()) {
-			plugin.reloadConfig();
-			player.sendMessage("Config reloaded.");
+		if (commandLabel.equalsIgnoreCase("hs")) {
+			player.sendMessage("Here, have a Hearthstone.");
+			is = new ItemStack(Material.getMaterial(getConfig().getInt("Options.Tools.HearthstoneID")), 1);
+			im = is.getItemMeta();
+			im.setDisplayName("Hearthstone");
+			lore = new ArrayList<String>();
+			lore.add(ChatColor.GOLD + "Use this item to return to the Hearthstone home.");
+			im.setLore(lore);
+			is.setItemMeta(im);
+			player.getInventory().addItem(is);
 			return true;
 		}
 
