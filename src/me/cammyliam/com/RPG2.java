@@ -306,7 +306,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 					BookMeta bm = (BookMeta) i.getItemMeta();
 					if (bm.getTitle() == "Stats") {
 						bm.setAuthor("Server");
-						bm.setPages(line(" ") + line("Your stats..") + line(" ") + line("Max health: " + h) + line("Health regen: " + r) + line("Stamina regen: " + s) + line("Dodge rating: " + d));
+						bm.setPages(line(" ") + line("Your stats..") + line("Max health: " + h) + line("Health regen: " + r) + line("Stamina regen: " + s) + line("Dodge rating: " + d));
 						i.setItemMeta(bm);
 					}
 				}
