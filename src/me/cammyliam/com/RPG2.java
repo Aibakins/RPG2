@@ -426,12 +426,13 @@ public class RPG2 extends JavaPlugin implements Listener {
 		Entity en = event.getRightClicked();
 	}*/
 
-	@EventHandler(priority = EventPriority.NORMAL)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		if (!getConfig().isSet("Players." + player.getName())) {
 			player.teleport(new Location(Bukkit.getWorld("world"), -140, 4, -23));
 			upd("Players." + player.getName() + ".dropto", "null");
+			upd("Players." + player.getName() + ".Looted", "0,0,0,world_");
 			upd("Players." + player.getName() + ".Bank", getConfig().getInt("Options.default-bankslots"));
 			upd("Players." + player.getName() + ".hearthstone", "null");
 			ItemStack is;
@@ -522,7 +523,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 			}
 			if (block.getType() == Material.CHEST) {
 				if (!getConfig().isSet("Players." + player.getName() + ".Looted")) {
-					upd("Players." + player.getName() + ".Looted", "0,0,0,world-");
+					upd("Players." + player.getName() + ".Looted", "0,0,0,world_");
 				}
 				Chest chest = (Chest) block.getState();
 				Inventory inv = chest.getInventory();
