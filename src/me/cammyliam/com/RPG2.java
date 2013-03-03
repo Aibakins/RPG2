@@ -1,7 +1,9 @@
 package me.cammyliam.com;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -43,6 +45,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -98,22 +101,6 @@ public class RPG2 extends JavaPlugin implements Listener {
 		}
 		return ret;
 	}
-
-	/*public float returnRage(Player player) {
-		return player.getExp();
-	}
-	public void addRage(Player player, float x) {
-		player.setTotalExperience(100);
-		if (player.getExp() > x) {
-			player.setExp(returnRage(player) + x);
-		}
-	}
-	public void remRage(Player player, float x) {
-		player.setTotalExperience(100);
-		if (player.getExp() > x) {
-			player.setExp(returnRage(player) - x);
-		}
-	}*/
 
 	public void spawnPet(Player player, String type) {
 		EntityType monster = EntityType.fromName(type.toUpperCase());
@@ -312,6 +299,33 @@ public class RPG2 extends JavaPlugin implements Listener {
 			d = 149;
 		}
 		upd("Players." + player.getName() + ".Dodge", d);
+		
+		for (ItemStack i : player.getInventory().getContents()) { //This also updates the stats book now
+			if (i != null) {
+				if (i.getType() == Material.WRITTEN_BOOK) {
+					BookMeta bm = (BookMeta) i.getItemMeta();
+					if (bm.getTitle() == "Stats") {
+						bm.setAuthor("Server");
+						bm.setPages(line(" ") + line("Your stats..") + line(" ") + line("Max health: " + h) + line("Health regen: " + r) + line("Stamina regen: " + s) + line("Dodge rating: " + d));
+						i.setItemMeta(bm);
+					}
+				}
+			}
+		}
+	}
+	
+	public String line(String inp) {
+		int c = 0;
+		String o = "";
+		for (char a : inp.toCharArray()) {
+			o = o + a;
+			c++;
+		}
+		while (c<=23) {
+		    o = o + " ";
+		    c++;
+		}
+		return o;
 	}
 
 	@Override
@@ -412,7 +426,7 @@ public class RPG2 extends JavaPlugin implements Listener {
 		Entity en = event.getRightClicked();
 	}*/
 
-	@EventHandler(priority = EventPriority.LOW)
+	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		if (!getConfig().isSet("Players." + player.getName())) {
@@ -431,6 +445,13 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im.setLore(lore);
 			is.setItemMeta(im);
 			player.getInventory().addItem(is);
+			ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+			BookMeta meta = (BookMeta) book.getItemMeta();
+			meta.setTitle("Stats");
+			meta.setAuthor("Server");
+			meta.addPage("HELLO!");
+			book.setItemMeta(meta);
+			player.getInventory().addItem(book);
 		}
 		if (player.isOp()) {
 			for (Player p : Bukkit.getOnlinePlayers()) {
@@ -649,27 +670,13 @@ public class RPG2 extends JavaPlugin implements Listener {
 					}
 				}
 			} catch (Exception e) {}
-			if (getConfig().isSet("Mobs." + event.getEntity().getEntityId())) {
-				event.setCancelled(true);
-				event.setDamage(0);
-			}
 			event.setDamage(Damage);
 			if (Damage > 0) {
-				/*addRage(given, 2);
-				if (returnRage(given) > 96) {
-					Damage = Damage * 2;
-					given.sendMessage(ChatColor.DARK_RED + "-- Times two damage! --");
-					remRage(given, 40);
-				}*/
 				given.sendMessage(ChatColor.MAGIC + "-- " + ChatColor.RED + "Damage given: " + Damage + ChatColor.WHITE + " " + ChatColor.MAGIC + "--");
 			}
 		}
 		if (event.getEntity() instanceof Player) {
-			int Damage = 0;
-			if (getConfig().isSet("Mobs." + event.getDamager().getEntityId())) {
-				event.setCancelled(true);
-				Damage = 0;
-			}
+			int Damage = event.getDamage();
 			Player taken = (Player) event.getEntity();
 			taken.setLevel(taken.getHealth());
 			if (rand.nextInt(150 - returnCFGDodge(taken)) == 1) {
@@ -895,6 +902,19 @@ public class RPG2 extends JavaPlugin implements Listener {
 			im.setLore(lore);
 			is.setItemMeta(im);
 			player.getInventory().addItem(is);
+			return true;
+		}
+		
+
+		if (commandLabel.equalsIgnoreCase("sb")) {
+			player.sendMessage("Here, have a stats book.");
+			ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+			BookMeta meta = (BookMeta) book.getItemMeta();
+			meta.setTitle("Stats");
+			meta.setAuthor("Server");
+			meta.addPage("HELLO!");
+			book.setItemMeta(meta);
+			player.getInventory().addItem(book);
 			return true;
 		}
 

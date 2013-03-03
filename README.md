@@ -20,6 +20,7 @@ Current Features
 * Custom mob health (Configurable or customizeable for how far a mob is from spawn)
 * Make gold drop instead of EXP.
 * Player visibility for OPs.
+* Book with players stats
 
 To add
 ====

@@ -22,8 +22,11 @@ commands:
         description: Visable options
         usage: /vis <hide/show>
     hs:
-        description: Spawna hearthstone
+        description: Spawn a hearthstone
         usage: /hs
     cheque:
         description: Make a bank cheque
         usage: /cheque <amount?
+    sb:
+        description: Spawn a stats boob
+        usage: /sb
