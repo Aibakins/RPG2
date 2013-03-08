@@ -290,10 +290,10 @@ public class RPG2 extends JavaPlugin implements Listener {
 				player.setHealth(player.getHealth()+((player.getMaxHealth()/player.getHealth())*r));
 			}
 		} catch(Exception e) {}
-		if (player.getFoodLevel()+(0.2 * s) > 20) {
+		if (player.getFoodLevel()+(0.1 * s) > 20) {
 			player.setFoodLevel(20);
 		} else {
-			player.setFoodLevel((int) (player.getFoodLevel()+(0.2 * s)));
+			player.setFoodLevel((int) (player.getFoodLevel()+(0.1 * s)));
 		}
 		if (d > 148) {
 			d = 149;
